@@ -1,0 +1,8 @@
+*.swp
+*.pyc
+*.py~
+.DS_Store
+.cache
+.pytest_cache/
+
+__pycache__
