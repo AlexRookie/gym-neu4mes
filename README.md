@@ -16,6 +16,11 @@ for episode in range(10):
 
 ## Installation
 
+Prerequisites:
+
+* Gym ~= 0.21.0
+* NumPy >= 1.18.0
+
 ```bash
 cd gym-neu4mes
 pip install -e .

@@ -1,5 +1,5 @@
 """
-Classic linear oscillator system (mass-spring-damper model) implemented by:
+Classic duffing oscillator implemented by:
 Alessandro Antonucci @AlexRookie
 University of Trento
 """
@@ -10,18 +10,18 @@ from gym.utils import seeding
 import numpy as np
 from os import path
 
-class OscillatorEnv(gym.Env):
+class OscillatorDuffingEnv(gym.Env):
     """
     Description:
-        A linear oscillator can be regarded as one of the simplest system
-        to model: it is formed by a mass connected to a spring and a damper,
-        wichi can move with an oscillating behaviour along a single
-        direction constrained by the spring and the damper.
+        A duffing oscillator is a non-linear second-order differential
+        equation that describes the motion of a damped oscillator with
+        complex harmonic motion. 
+        and driven oscillators. 
     """
 
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 30}
 
-    def __init__(self, dt=0.05, m=1.0, c=0.175, k=3.0, force=[-1.0,1.0], x0=[0,1], v0=[-1.0,1.0], method="euler"):
+    def __init__(self, type, dt=0.05, m=1.0, c=0.175, k=1.0, alpha=0.5, alpha2=10, force=[-1.0,1.0], x0=[0,1], v0=[-1.0,1.0], method="euler"):
         self.max_speed = 3
         self.min_force = force[0]
         self.max_force = force[1]
@@ -29,8 +29,12 @@ class OscillatorEnv(gym.Env):
         self.m = m
         self.c = c
         self.k = k
+        self.alpha = alpha
+        self.alpha2 = alpha2
         self.x0 = x0
         self.v0 = v0
+
+        self.type = type
         self.kinematics_integrator = method
         self.state = None
 
@@ -58,6 +62,8 @@ class OscillatorEnv(gym.Env):
         m = self.m
         c = self.c
         k = self.k
+        alpha = self.alpha
+        alpha2 = self.alpha2
         dt = self.dt
 
         if isinstance(u, float):
@@ -69,7 +75,10 @@ class OscillatorEnv(gym.Env):
         #costs = angle_normalize(th) ** 2 + 0.1 * thdot ** 2 + 0.001 * (u ** 2)
         # TODO: metti reward
 
-        xacc = (1 / m) * (u - c * x_dot - k * x)
+        if self.type == 'normal':
+            xacc = (1 / m) * (u - c * x_dot - k * x - alpha * np.power(x,3))
+        elif self.type == 'modified':
+            xacc = (1 / m) * (u - c * x_dot - k * x - alpha * np.power(x,3) - alpha2 * x_dot * np.power(x,2))
 
         if self.kinematics_integrator == "euler":
             # forward Euler
